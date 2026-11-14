@@ -18,6 +18,9 @@
   justify-content: space-between;
   padding: 40px 30px;
   z-index: 20;
+  // Everything fits the window: the skin area absorbs the leftover height and shrinks first.
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* User Profile */
@@ -73,8 +76,9 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin-top: 40px;
+  margin: 24px 0 20px;
   flex: 1;
+  min-height: 0;
 }
 
 /* Bottom Area */
@@ -86,6 +90,7 @@
   border-radius: 12px;
   padding: 20px;
   background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .profile-selector-container {
@@ -288,6 +293,34 @@
 
   .bypass {
     color: #f5c518;
+  }
+
+  // A long reason scrolls inside the box instead of pushing Play off screen.
+  max-height: 22vh;
+  overflow-y: auto;
+}
+
+// Short windows: tighten spacing so the profile box still fits.
+@media (max-height: 780px) {
+  .home-sidebar {
+    padding: 24px 24px;
+  }
+
+  .sidebar-middle {
+    margin: 12px 0;
+  }
+
+  .sidebar-bottom {
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .server-status {
+    padding: 6px 10px;
+  }
+
+  #btn-play {
+    height: 52px;
   }
 }
 

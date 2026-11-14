@@ -4,7 +4,7 @@
   "author": "graydeon",
   "description": "Launcher for the DORSMP modded Minecraft server",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "main": "dist-electron/main.js",
   "scripts": {

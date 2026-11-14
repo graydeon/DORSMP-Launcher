@@ -51,14 +51,19 @@
 
 <style>
   .sidebar-skin {
+    position: relative;
     flex: 1;
     min-height: 0;
+    overflow: hidden;
     cursor: grab;
   }
   .sidebar-skin:active {
     cursor: grabbing;
   }
+  /* Out of the layout flow, so the canvas never holds its box open when the sidebar needs the space. */
   canvas {
+    position: absolute;
+    inset: 0;
     display: block;
   }
 </style>
