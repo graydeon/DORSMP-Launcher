@@ -64,7 +64,7 @@
       "identity": "-",
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "artifactName": "${productName}-${version}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "dmg": {
       "background": "build/background.png",

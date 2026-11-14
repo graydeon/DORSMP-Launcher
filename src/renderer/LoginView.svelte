@@ -21,7 +21,7 @@
 
 <div id="view-login" class="view">
   <div class="login-card">
-    <img src={logo} class="logo" alt="EML logo" />
+    <img src={logo} class="logo" alt="DORSMP" />
     <h1>Welcome</h1>
     <p class="subtitle">Log in to verify your access.</p>
     <button class="btn btn-microsoft" disabled={connecting} onclick={login}>

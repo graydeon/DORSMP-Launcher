@@ -10,6 +10,10 @@ Launcher for the DORSMP modded Minecraft server (NeoForge 1.21.1). Built on [EML
 - Launcher hides instead of closing after launch, so crashes can be detected.
 - No shop panel.
 
+## Install
+
+Download the installer for your system from the [latest release](https://github.com/graydeon/DORSMP-Launcher/releases/latest). The launcher isn't code-signed, so Windows and macOS show a warning on first launch; [INSTALL.md](INSTALL.md) explains how to get past it.
+
 ## Develop
 
 ```bash
