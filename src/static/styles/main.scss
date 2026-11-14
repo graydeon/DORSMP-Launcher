@@ -62,7 +62,16 @@ a {
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
+    transition:
+      background 0.4s ease,
+      backdrop-filter 0.4s ease;
   }
+}
+
+// Home with the news feed hidden: show the photo as is (the sidebar keeps its own glass blur).
+body.news-collapsed .app-background::after {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: none;
 }
 
 /* --- Views Management --- */

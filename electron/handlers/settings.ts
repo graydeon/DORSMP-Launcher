@@ -27,6 +27,7 @@ export interface IGameSettings {
     fullscreen: boolean
   }
   launcherAction: 'close' | 'keep' | 'hide'
+  newsCollapsed?: boolean
 }
 
 export const DEFAULT_SETTINGS: IGameSettings = {

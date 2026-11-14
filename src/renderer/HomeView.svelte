@@ -6,7 +6,8 @@
   import type { IProfile } from 'eml-lib'
   import { game, news as newsApi, profiles as profilesApi, server, settings as settingsApi } from '../ipc'
   import { account, avatar, get as getStoreValue, overlay, profileTokens, profiles, requestedProfile, selectedProfile, showDialog } from './stores'
-  import { slide } from 'svelte/transition'
+  import { fade, slide } from 'svelte/transition'
+  import logo from '../static/images/logo.png'
   import SidebarSkin from './SidebarSkin.svelte'
 
   type NewsFeedItem = {
@@ -38,6 +39,24 @@
   let profileRequest = 0
   let selectedSlug = $derived($selectedProfile?.slug)
 
+  // Collapsed news shows the background unblurred with the logo. Saved in settings.json:
+  // Electron does not keep localStorage for file:// pages.
+  let newsCollapsed = $state(false)
+
+  $effect(() => {
+    document.body.classList.toggle('news-collapsed', newsCollapsed)
+    return () => document.body.classList.remove('news-collapsed')
+  })
+
+  async function toggleNews() {
+    newsCollapsed = !newsCollapsed
+    try {
+      await settingsApi.set({ ...(await settingsApi.get()), newsCollapsed })
+    } catch (error) {
+      logger.warn('Could not save news panel state:', error)
+    }
+  }
+
   marked.use({
     renderer: {
       link(link) {
@@ -53,6 +72,7 @@
     }
     window.addEventListener('click', closeMenu)
     void loadNews()
+    void settingsApi.get().then((s) => (newsCollapsed = !!s.newsCollapsed)).catch(() => {})
 
     const unsubscribe = [
       game.launchComputeDownload(() => setLaunchStep('Preparing download...')),
@@ -273,17 +293,28 @@ Ready to launch the game with the following settings:
       </div>
     </div>
   </aside>
-  <main class="home-content">
+  <main class="home-content" class:collapsed={newsCollapsed}>
     <div class="news-header">
-      <h2>News feed</h2>
+      {#if !newsCollapsed}<h2 transition:fade={{ duration: 200 }}>News feed</h2>{/if}
       <div class="social-links">
+        <button
+          class="btn btn-icon-only"
+          title={newsCollapsed ? 'Show news' : 'Hide news'}
+          aria-label={newsCollapsed ? 'Show news' : 'Hide news'}
+          aria-expanded={!newsCollapsed}
+          onclick={toggleNews}
+          ><i class="fa-solid" class:fa-newspaper={newsCollapsed} class:fa-chevron-right={!newsCollapsed}></i></button
+        >
         <a href="https://discord.gg/Jpz9qKzM5h" target="_blank" rel="noreferrer" class="btn btn-icon-only" aria-label="Discord"
           ><i class="fa-brands fa-discord"></i></a
         >
       </div>
     </div>
+    {#if newsCollapsed}
+      <div class="hero-logo" transition:fade={{ duration: 300 }}><img src={logo} alt="DORSMP" /></div>
+    {:else}
     <hr />
-    <div class="news-list" id="news-list">
+    <div class="news-list" id="news-list" transition:fade={{ duration: 200 }}>
       {#if newsLoading}<div class="news-empty">Loading news...</div>
       {:else if newsError}<div class="news-empty">
           <span>News could not be loaded.</span> <button class="btn-text" onclick={loadNews}>Retry</button>
@@ -312,6 +343,7 @@ Ready to launch the game with the following settings:
         {/each}
       {/if}
     </div>
+    {/if}
   </main>
 </div>
 

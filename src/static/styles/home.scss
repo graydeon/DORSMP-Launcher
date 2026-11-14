@@ -349,6 +349,7 @@
   .social-links {
     display: flex;
     gap: 10px;
+    margin-left: auto;
   }
 }
 
@@ -459,5 +460,28 @@
     line-height: 1.7;
     color: #f0f0f0;
 
+  }
+}
+
+/* --- COLLAPSED NEWS: clear background with the logo --- */
+.home-content.collapsed {
+  overflow: hidden;
+}
+
+.hero-logo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--sidebar-width);
+  height: 33.3vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  img {
+    width: min(460px, 45%);
+    margin-top: 6vh;
+    filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.55));
   }
 }
