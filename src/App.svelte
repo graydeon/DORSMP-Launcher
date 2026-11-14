@@ -51,7 +51,7 @@
         downloadingUpdate = true
         blocking.set({ kind: 'update', label: 'Preparing update...', percent: 0 })
         bootstraps.downloadProgress((value) => {
-          const percent = value.total.amount ? (value.downloaded.size / value.total.amount) * 100 : 0
+          const percent = value.total.size ? (value.downloaded.size / value.total.size) * 100 : 0
           blocking.set({ kind: 'update', label: 'Downloading update...', percent })
         })
         bootstraps.downloadEnd(async () => {
@@ -63,6 +63,18 @@
         logger.log('Update installed, restarting launcher...')
         window.setTimeout(() => window.location.reload(), 1000)
         return
+      }
+
+      if (update.manualUpdate && update.releaseUrl) {
+        const releaseUrl = update.releaseUrl
+        void showDialog(
+          `Version ${update.manualUpdate} of the launcher is out. macOS can't install it automatically, so download it and drag it into Applications again.`,
+          [
+            { text: 'Later', type: 'cancel' },
+            { text: 'Download', type: 'ok', action: () => void window.open(releaseUrl, '_blank') }
+          ],
+          'Launcher update'
+        )
       }
 
       if (maintenanceInfo) {

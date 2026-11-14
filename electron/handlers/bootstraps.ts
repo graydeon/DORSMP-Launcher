@@ -4,6 +4,8 @@ import { Bootstrap } from 'eml-lib'
 import logger from 'electron-log/main'
 import { ADMINTOOL_URL } from '../const'
 
+const RELEASES_URL = 'https://github.com/graydeon/DORSMP-Launcher/releases/latest'
+
 let bootstraps: Bootstrap | null = null
 
 export function registerBootstrapHandlers(mainWindow: Electron.BrowserWindow): Bootstrap {
@@ -25,7 +27,13 @@ export function registerBootstrapHandlers(mainWindow: Electron.BrowserWindow): B
 
   ipcMain.handle('bootstraps:check', async () => {
     try {
-      return await bootstraps?.checkForUpdate()
+      const update = await bootstraps?.checkForUpdate()
+      // macOS refuses self-installed updates for apps without an Apple Developer ID signature (ours is ad-hoc),
+      // so Mac players are sent to the release page instead.
+      if (process.platform === 'darwin' && update?.updateAvailable) {
+        return { updateAvailable: false, manualUpdate: update.latestVersion, releaseUrl: RELEASES_URL }
+      }
+      return update
     } catch (err) {
       logger.error('Error checking for bootstraps update', err)
       return { updateAvailable: false }

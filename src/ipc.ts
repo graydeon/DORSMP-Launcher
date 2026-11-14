@@ -59,7 +59,7 @@ declare global {
         get: () => Promise<IMaintenance | null>
       }
       bootstraps: {
-        check: () => Promise<IBootstraps>
+        check: () => Promise<IBootstraps & { manualUpdate?: string; releaseUrl?: string }>
         download: () => Promise<string>
         install: () => Promise<void>
         downloadProgress: (callback: (value: DownloaderEvents['download_progress'][0]) => void) => void

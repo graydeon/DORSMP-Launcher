@@ -7,6 +7,7 @@
   import { game, news as newsApi, profiles as profilesApi, server, settings as settingsApi } from '../ipc'
   import { account, avatar, get as getStoreValue, overlay, profileTokens, profiles, requestedProfile, selectedProfile, showDialog } from './stores'
   import { slide } from 'svelte/transition'
+  import SidebarSkin from './SidebarSkin.svelte'
 
   type NewsFeedItem = {
     id?: string
@@ -224,7 +225,7 @@ Ready to launch the game with the following settings:
         ><i class="fa-fw fa-solid fa-gear"></i></button
       >
     </div>
-    <div class="sidebar-middle"></div>
+    <div class="sidebar-middle"><SidebarSkin /></div>
     <div class="sidebar-bottom">
       <div class="profile-selector-container" class:open={profileMenuOpen} bind:this={profileSelector}>
         <button class="selected-profile" aria-expanded={profileMenuOpen} onclick={() => (profileMenuOpen = !profileMenuOpen)}>

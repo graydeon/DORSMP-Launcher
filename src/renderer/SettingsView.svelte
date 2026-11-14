@@ -47,7 +47,9 @@
   }
   let settings = $state<IGameSettings | null>(null)
   let version = $state('')
-  let maxMemory = $state(16)
+  // Fixed 0-128 GB range for every PC; a warning shows when the max is above this PC's RAM.
+  const maxMemory = 128
+  let systemMemory = $state(0)
   let minMemory = $state(2)
   let maxAllocated = $state(8)
   let resolution = $state('854x480')
@@ -66,8 +68,8 @@
   let settingsContent = $state<HTMLElement | undefined>()
   let saving = $state(false)
 
-  let minPercent = $derived(((minMemory - 0.5) / (maxMemory - 0.5)) * 100)
-  let maxPercent = $derived(((maxAllocated - 0.5) / (maxMemory - 0.5)) * 100)
+  let minPercent = $derived((minMemory / maxMemory) * 100)
+  let maxPercent = $derived((maxAllocated / maxMemory) * 100)
   let activeSkin = $derived($skins.find((item) => item.state === 'active') ?? defaultSkin)
   let activeCape = $derived($capes.find((item) => item.state === 'active'))
   let canAddSkin = $derived(skinSourceType === 'url' ? !!skinUrl.trim() : !!skinFile)
@@ -86,8 +88,8 @@
     try {
       const [info, saved] = await Promise.all([system.getInfo(), settingsApi.get()])
       settings = saved
-      version = `EML Template v${info.version}`
-      maxMemory = Math.max(1, Math.min(info.totalMem, 16))
+      version = `DORSMP Launcher v${info.version}`
+      systemMemory = info.totalMem
       minMemory = Math.min(saved.memory.min, maxMemory - 0.5)
       maxAllocated = Math.min(Math.max(saved.memory.max, minMemory + 0.5), maxMemory)
       availableResolutions = [
@@ -149,7 +151,7 @@
   function normalizeMemory(which: 'min' | 'max') {
     if (which === 'min') {
       minMemory = Math.min(minMemory, maxAllocated - 0.5)
-      minMemory = Math.max(0.5, minMemory)
+      minMemory = Math.max(0, minMemory)
     } else {
       maxAllocated = Math.max(maxAllocated, minMemory + 0.5)
       maxAllocated = Math.min(maxMemory, maxAllocated)
@@ -340,7 +342,7 @@
               <input
                 id="ram-min"
                 type="range"
-                min="0.5"
+                min="0"
                 max={maxMemory}
                 step="0.5"
                 bind:value={minMemory}
@@ -349,7 +351,7 @@
               />
               <input
                 type="range"
-                min="0.5"
+                min="0"
                 max={maxMemory}
                 step="0.5"
                 bind:value={maxAllocated}
@@ -358,6 +360,9 @@
               />
             </div>
             <div class="ram-labels"><span>{minMemory} GB</span><span>{maxAllocated} GB</span></div>
+            {#if systemMemory && maxAllocated > systemMemory}<p class="ram-warning">
+                This PC has {systemMemory} GB of RAM. Minecraft will not start with more than that.
+              </p>{/if}
           </div>
           <div class="setting-group">
             <label for="resolution-select"><i class="fa-fw fa-solid fa-display"></i>&nbsp;&nbsp;Window size</label>

@@ -50,7 +50,7 @@
       "createStartMenuShortcut": true,
       "shortcutName": "DORSMP Launcher",
       "deleteAppDataOnUninstall": true,
-      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "artifactName": "DORSMP-Launcher-Setup-${version}.${ext}",
       "uninstallDisplayName": "DORSMP Launcher"
     },
     "mac": {
@@ -64,7 +64,7 @@
       "identity": "-",
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "DORSMP-Launcher-${version}-${arch}.${ext}"
     },
     "dmg": {
       "background": "build/background.png",
@@ -95,9 +95,15 @@
       "icon": "build/icon.png",
       "category": "Game",
       "description": "Launcher for the DORSMP modded Minecraft server",
-      "artifactName": "${productName}-${version}.${ext}",
+      "artifactName": "DORSMP-Launcher-${version}.${ext}",
       "maintainer": "graydeon"
-    }
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://launcher.graydeon.com/files/bootstraps"
+      }
+    ]
   },
   "dependencies": {
     "dompurify": "^3.4.17",
