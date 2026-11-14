@@ -96,7 +96,9 @@ contextBridge.exposeInMainWorld('api', {
     onDetected: (callback: (value: { id: string; exitCode: number; date: string; profile: string; minecraftVersion: string }) => void) =>
       subscribe('crashreports:detected', callback),
     send: (id: string): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('crashreports:send', id),
-    dismiss: (id: string): Promise<void> => ipcRenderer.invoke('crashreports:dismiss', id)
+    dismiss: (id: string): Promise<void> => ipcRenderer.invoke('crashreports:dismiss', id),
+    sendLogs: (payload: { account: Account; profileSlug?: string }): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('crashreports:sendLogs', payload)
   },
   skin: {
     reload: (account: Account): Promise<void | null> => ipcRenderer.invoke('skin:reload', account),

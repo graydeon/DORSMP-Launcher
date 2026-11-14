@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { crashReports } from '../ipc'
   import { showDialog } from './stores'
+  import { LOGS_NOTICE } from './logsNotice'
 
   type CrashNotice = {
     id: string
@@ -27,10 +28,10 @@
       while (queue.length) {
         const report = queue.shift()!
         const accepted = await showDialog<boolean>(
-          `Minecraft closed unexpectedly (exit code ${report.exitCode}). Would you like to send an anonymized crash report?`,
+          `Minecraft closed unexpectedly (exit code ${report.exitCode}). Send the logs to the admins?\n\n${LOGS_NOTICE}`,
           [
             { text: 'Do not send', type: 'cancel' },
-            { text: 'Send report', type: 'ok' }
+            { text: 'Send logs', type: 'ok' }
           ],
           'The game crashed'
         )

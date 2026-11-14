@@ -3,7 +3,7 @@ import { Launcher } from 'eml-lib'
 import type { Account } from 'eml-lib'
 import type { IGameSettings } from './settings'
 import logger from 'electron-log/main'
-import { ADMINTOOL_URL } from '../const'
+import { ADMINTOOL_URL, GAME_FOLDER } from '../const'
 import type { StatsIntegration } from './stats'
 import type { CrashReportIntegration } from './crashreports'
 
@@ -15,7 +15,7 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow, integrations
 
     const launcher = new Launcher({
       url: ADMINTOOL_URL,
-      root: 'goldfrite',
+      root: GAME_FOLDER,
       profile: { slug: profileSlug, token: payload.token },
       account: account,
       cleaning: {

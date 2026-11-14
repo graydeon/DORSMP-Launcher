@@ -17,7 +17,7 @@
       tabindex="-1"
     >
       {#if $dialog.title}<h3 id="dialog-title">{$dialog.title}</h3>{/if}
-      <p>{$dialog.message}</p>
+      <p style="white-space: pre-line">{$dialog.message}</p>
       <div class="dialog-actions">
         {#each $dialog.buttons as button (button.text)}
           <button

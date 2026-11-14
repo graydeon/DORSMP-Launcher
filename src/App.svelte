@@ -10,15 +10,32 @@
   import ProfileUnlock from './renderer/ProfileUnlock.svelte'
   import DialogHost from './renderer/DialogHost.svelte'
   import CrashReportPrompt from './renderer/CrashReportPrompt.svelte'
-  import defaultBackground from './static/images/bg.png'
+  // Every image dropped in static/images/backgrounds/ joins the rotation (sorted by file name).
+  const bundledBackgrounds = Object.entries(
+    import.meta.glob<string>('./static/images/backgrounds/*.{webp,png,jpg,jpeg}', { eager: true, import: 'default' })
+  )
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, url]) => url)
+  const SLIDE_MS = 12000
 
-  let applicationBackground = $state(defaultBackground)
+  let backgrounds = $state<string[]>(bundledBackgrounds)
+  let currentBackground = $state(0)
   let loadingHidden = $state(false)
   let showLoading = $state(true)
 
   onMount(() => {
     void initialize()
-    return () => document.body.classList.remove('loaded')
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const timer = window.setInterval(async () => {
+      if (reduceMotion || backgrounds.length < 2) return
+      const next = (currentBackground + 1) % backgrounds.length
+      await preloadImage(backgrounds[next])
+      currentBackground = next
+    }, SLIDE_MS)
+    return () => {
+      window.clearInterval(timer)
+      document.body.classList.remove('loaded')
+    }
   })
 
   async function initialize() {
@@ -26,7 +43,9 @@
     let downloadingUpdate = false
     try {
       const [update, backgroundInfo, maintenanceInfo] = await Promise.all([bootstraps.check(), background.get(), maintenance.get()])
-      applicationBackground = backgroundInfo?.file?.url ?? defaultBackground
+      // The background set in AdminTool goes first, then the bundled ones.
+      const featured = backgroundInfo?.file?.url
+      if (featured) backgrounds = [featured, ...bundledBackgrounds]
 
       if (update.updateAvailable) {
         downloadingUpdate = true
@@ -58,7 +77,7 @@
         return
       }
 
-      await preloadImage(applicationBackground)
+      if (backgrounds[0]) await preloadImage(backgrounds[0])
       const session = await auth.refresh()
       if (session.success) {
         await loadSessionAssets(session.account)
@@ -129,7 +148,9 @@
 {/if}
 
 <div id="app">
-  <div class="app-background" style:background-image={`url('${applicationBackground}')`}></div>
+  {#each backgrounds as url, i (url)}
+    <div class="app-background" class:active={i === currentBackground} style:background-image={`url('${url}')`}></div>
+  {/each}
   {#if $page === 'login'}
     <LoginView />
   {:else if $page === 'home'}
@@ -164,6 +185,9 @@
     transition: opacity 0.4s ease-in-out;
     z-index: 2000;
   }
+
+  div.app-background { opacity: 0; transition: opacity 1.5s ease-in-out; }
+  div.app-background.active { opacity: 1; }
 
   div.loading { opacity: 1; }
   div.loading.loaded { opacity: 0; }

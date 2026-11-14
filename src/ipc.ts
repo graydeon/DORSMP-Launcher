@@ -108,6 +108,7 @@ declare global {
         onDetected: (callback: (value: { id: string; exitCode: number; date: string; profile: string; minecraftVersion: string }) => void) => () => void
         send: (id: string) => Promise<{ success: boolean; error?: string }>
         dismiss: (id: string) => Promise<void>
+        sendLogs: (payload: { account: Account; profileSlug?: string }) => Promise<{ success: boolean; error?: string }>
       }
       settings: {
         get: () => Promise<IGameSettings>
@@ -206,7 +207,8 @@ export const crashReports = {
   onDetected: (callback: (value: { id: string; exitCode: number; date: string; profile: string; minecraftVersion: string }) => void) =>
     window.api.crashReports.onDetected(callback),
   send: (id: string) => window.api.crashReports.send(id),
-  dismiss: (id: string) => window.api.crashReports.dismiss(id)
+  dismiss: (id: string) => window.api.crashReports.dismiss(id),
+  sendLogs: (payload: { account: Account; profileSlug?: string }) => window.api.crashReports.sendLogs(payload)
 }
 
 export const settings = {

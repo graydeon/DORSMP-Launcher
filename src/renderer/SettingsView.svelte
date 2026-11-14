@@ -2,7 +2,8 @@
   import { onMount, tick } from 'svelte'
   import { fade } from 'svelte/transition'
   import type { SkinViewer as SkinViewerType } from 'skinview3d'
-  import { auth, settings as settingsApi, skin as skinApi, system } from '../ipc'
+  import { auth, crashReports, settings as settingsApi, skin as skinApi, system } from '../ipc'
+  import { LOGS_NOTICE } from './logsNotice'
   import type { IGameSettings } from '../../electron/handlers/settings'
   import { account, avatar, capes, overlay, page, profileTokens, profiles, selectedProfile, showDialog, skins } from './stores'
   import type { ICape, ISkin } from 'eml-lib'
@@ -28,6 +29,22 @@
   } as ISkin
 
   let tab = $state<'game' | 'skin' | 'account'>('game')
+  let sendingLogs = $state(false)
+
+  async function sendLogs() {
+    const currentAccount = $account
+    if (!currentAccount) return
+    if (!(await showDialog(`Send your logs to the admins?\n\n${LOGS_NOTICE}`, [{ text: 'Cancel', type: 'cancel' }, { text: 'Send logs', type: 'ok' }], 'Send logs')))
+      return
+    sendingLogs = true
+    const result = await crashReports.sendLogs({ account: currentAccount, profileSlug: $selectedProfile?.slug })
+    sendingLogs = false
+    await showDialog(
+      result.success ? 'Your logs were sent. Tell an admin roughly when the problem happened.' : `Could not send logs: ${result.error ?? 'unknown error'}`,
+      [{ text: 'OK', type: 'ok' }],
+      result.success ? 'Logs sent' : 'Send failed'
+    )
+  }
   let settings = $state<IGameSettings | null>(null)
   let version = $state('')
   let maxMemory = $state(16)
@@ -365,6 +382,12 @@
                 ><option value="bundled">Use bundled Java (recommended)</option><option value="system">Use system Java (PATH)</option></select
               >
             </div>
+          </div>
+          <div class="setting-group">
+            <label for="send-logs"><i class="fa-fw fa-solid fa-bug"></i>&nbsp;&nbsp;Crashes or freezes</label>
+            <button id="send-logs" class="btn btn-secondary" disabled={sendingLogs} onclick={sendLogs}
+              >{sendingLogs ? 'Sending...' : 'Send logs to admins'}</button
+            >
           </div>
         </section>
       {:else if tab === 'skin'}

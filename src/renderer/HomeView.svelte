@@ -6,10 +6,6 @@
   import type { IProfile } from 'eml-lib'
   import { game, news as newsApi, profiles as profilesApi, server, settings as settingsApi } from '../ipc'
   import { account, avatar, get as getStoreValue, overlay, profileTokens, profiles, requestedProfile, selectedProfile, showDialog } from './stores'
-  import goldImage from '../static/images/gold.png'
-  import silverImage from '../static/images/silver.png'
-  import bronzeImage from '../static/images/bronze.png'
-  import boxImage from '../static/images/box.png'
   import { slide } from 'svelte/transition'
 
   type NewsFeedItem = {
@@ -228,20 +224,7 @@ Ready to launch the game with the following settings:
         ><i class="fa-fw fa-solid fa-gear"></i></button
       >
     </div>
-    <div class="sidebar-middle">
-      <h3 class="shop-header">
-        <span>Shop</span>
-        <span class="shop-link">
-          <a href="https://emlproject.pages.dev" target="_blank" rel="noreferrer"><i class="fa-fw fa-solid fa-cart-shopping"></i> Visit shop...</a>
-        </span>
-      </h3>
-      {#each [{ image: goldImage, name: 'Gold Rank', price: '$9.99' }, { image: silverImage, name: 'Silver Rank', price: '$6.99' }, { image: bronzeImage, name: 'Bronze Rank', price: '$3.99' }, { image: boxImage, name: 'Mystery Box', price: '$5.99' }] as item}
-        <div class="shop-item">
-          <img src={item.image} class="shop-item-image" alt={item.name} />
-          <div class="shop-item-details"><span class="item-name">{item.name}</span><span class="item-price">{item.price}</span></div>
-        </div>
-      {/each}
-    </div>
+    <div class="sidebar-middle"></div>
     <div class="sidebar-bottom">
       <div class="profile-selector-container" class:open={profileMenuOpen} bind:this={profileSelector}>
         <button class="selected-profile" aria-expanded={profileMenuOpen} onclick={() => (profileMenuOpen = !profileMenuOpen)}>
@@ -293,14 +276,8 @@ Ready to launch the game with the following settings:
     <div class="news-header">
       <h2>News feed</h2>
       <div class="social-links">
-        <a href="https://emlproject.com/discord/other" target="_blank" rel="noreferrer" class="btn btn-icon-only" aria-label="Discord"
+        <a href="https://discord.gg/Jpz9qKzM5h" target="_blank" rel="noreferrer" class="btn btn-icon-only" aria-label="Discord"
           ><i class="fa-brands fa-discord"></i></a
-        >
-        <a href="https://x.com/EMLProject" target="_blank" rel="noreferrer" class="btn btn-icon-only" aria-label="X"
-          ><i class="fa-brands fa-x-twitter"></i></a
-        >
-        <a href="https://emlproject.com" target="_blank" rel="noreferrer" class="btn btn-icon-only" aria-label="Website"
-          ><i class="fa-solid fa-globe"></i></a
         >
       </div>
     </div>

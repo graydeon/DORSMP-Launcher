@@ -40,7 +40,7 @@ export const DEFAULT_SETTINGS: IGameSettings = {
     height: 720,
     fullscreen: false
   },
-  launcherAction: 'close'
+  launcherAction: 'hide'
 }
 
 export function registerSettingsHandlers() {
