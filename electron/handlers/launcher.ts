@@ -1,4 +1,5 @@
 import { ipcMain, BrowserWindow, app } from 'electron'
+import { existsSync, readdirSync } from 'node:fs'
 import { Launcher } from 'eml-lib'
 import type { Account } from 'eml-lib'
 import type { IGameSettings } from './settings'
@@ -18,8 +19,10 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow, integrations
       root: GAME_FOLDER,
       profile: { slug: profileSlug, token: payload.token },
       account: account,
+      // Cleaning only touches mods/: see the launch_clean handler below.
       cleaning: {
-        enabled: false
+        enabled: true,
+        ignored: []
       },
       java: java,
       memory: {
@@ -150,6 +153,13 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow, integrations
 
     launcher.on('launch_crash', () => {
       gameCrashed = true
+    })
+
+    // Remove mods the profile no longer serves (a stale jar can crash the game), and nothing else:
+    // every other top-level file and folder (config, saves, screenshots, options...) is ignored by the cleaner.
+    launcher.on('launch_clean', () => {
+      const root = launcher.config.root
+      launcher.config.cleaning.ignored = existsSync(root) ? readdirSync(root).filter((name) => name !== 'mods') : []
     })
 
     launcher.on('launch_debug', (message) => {

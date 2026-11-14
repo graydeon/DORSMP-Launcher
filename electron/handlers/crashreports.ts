@@ -62,14 +62,25 @@ function createCrashReport() {
   const instance = new CrashReport(ADMINTOOL_URL)
   // eml-lib reads latest.log and the newest crash-reports/*.txt; add debug.log and hs_err, and drop voice transcripts.
   // Everything still goes through eml-lib's sanitizer (username, UUID, tokens, IPs) afterwards.
-  const internal = instance as unknown as { readLogs: (launcher: Launcher, crashData: CrashData) => Promise<Logs> }
+  const internal = instance as unknown as {
+    readLogs: (launcher: Launcher, crashData: CrashData) => Promise<Logs>
+    sanitizeText: (text: string, launcher: Launcher) => string
+  }
   const readLogs = internal.readLogs.bind(instance)
   internal.readLogs = async (launcher, crashData) => {
     const logs = await readLogs(launcher, crashData)
     logs.latestLog = tail(stripSpeech(logs.latestLog))
     logs.launcherLogs = stripSpeech(logs.launcherLogs)
-    logs.crashReportLog += await extraLogs(launcher.config.root)
+    logs.crashReportLog = `=== PLAYER ===\n${launcher.config.account.name}\n\n${logs.crashReportLog}${await extraLogs(launcher.config.root)}`
     return logs
+  }
+  // Admins need to know who crashed, so keep the Minecraft username. UUID, tokens, the PC's
+  // account name and IPs are still masked by eml-lib.
+  const sanitizeText = internal.sanitizeText.bind(instance)
+  internal.sanitizeText = (text, launcher) => {
+    const keepName = Object.create(launcher) as Launcher
+    Object.defineProperty(keepName, 'config', { value: { ...launcher.config, account: { ...launcher.config.account, name: '' } } })
+    return sanitizeText(text, keepName)
   }
   return instance
 }
