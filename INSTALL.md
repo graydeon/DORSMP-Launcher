@@ -2,7 +2,7 @@
 
 The launcher isn't signed with a paid certificate, so Windows and macOS warn you the first time you open it. That's expected; the download is the same file built from this repository.
 
-**Windows** (`DORSMP Launcher-Setup-x.y.z.exe`)
+**Windows** (`DORSMP.Launcher-Setup-x.y.z.exe`)
 1. Run the installer. If a blue "Windows protected your PC" box appears, click **More info**, then **Run anyway**.
 2. If your browser blocks the download, choose **Keep** (Edge: the `...` menu next to the download, then **Keep**, then **Keep anyway**).
 
@@ -11,7 +11,6 @@ The launcher isn't signed with a paid certificate, so Windows and macOS warn you
 2. Open it once. When macOS says it can't be opened, open **System Settings > Privacy & Security**, scroll down, and click **Open Anyway** next to DORSMP Launcher. Confirm with your password.
 
 **Linux**
-- AppImage: `chmod +x "DORSMP Launcher-x.y.z.AppImage"` and run it.
-- Debian/Ubuntu: `sudo apt install "./DORSMP Launcher-x.y.z.deb"`
+- AppImage: `chmod +x DORSMP*.AppImage`, then run it.
+- Debian/Ubuntu: `sudo apt install ./DORSMP*.deb`
 
-After the first launch, updates install automatically.
