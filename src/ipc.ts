@@ -6,7 +6,6 @@ import type {
   CleanerEvents,
   DownloaderEvents,
   FileManagerEvents,
-  IBackground,
   IBootstraps,
   IMaintenance,
   INews,
@@ -53,10 +52,10 @@ declare global {
         getCategories: () => Promise<INewsCategory[]>
       }
       background: {
-        get: () => Promise<IBackground | null>
+        list: () => Promise<string[]>
       }
       maintenance: {
-        get: () => Promise<IMaintenance | null>
+        get: (account?: Account) => Promise<IMaintenance | null>
       }
       bootstraps: {
         check: () => Promise<IBootstraps & { manualUpdate?: string; releaseUrl?: string }>
@@ -156,11 +155,11 @@ export const news = {
 }
 
 export const background = {
-  get: async () => await window.api.background.get()
+  list: async () => await window.api.background.list()
 }
 
 export const maintenance = {
-  get: async () => await window.api.maintenance.get()
+  get: async (account?: Account) => await window.api.maintenance.get(account)
 }
 
 export const bootstraps = {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import logger from 'electron-log/renderer'
-  import { auth, background, bootstraps, maintenance } from './ipc'
+  import { auth, background, bootstraps } from './ipc'
   import { blocking, launcherReady, overlay, page, requestedProfile, showDialog } from './renderer/stores'
   import { loadSessionAssets } from './renderer/session'
   import LoginView from './renderer/LoginView.svelte'
@@ -42,10 +42,9 @@
     logger.log('Initializing launcher...')
     let downloadingUpdate = false
     try {
-      const [update, backgroundInfo, maintenanceInfo] = await Promise.all([bootstraps.check(), background.get(), maintenance.get()])
-      // The background set in AdminTool goes first, then the bundled ones.
-      const featured = backgroundInfo?.file?.url
-      if (featured) backgrounds = [featured, ...bundledBackgrounds]
+      const [update, uploaded] = await Promise.all([bootstraps.check(), background.list()])
+      // Backgrounds uploaded in the AdminTool come first (active one leading), then the bundled ones.
+      if (uploaded.length) backgrounds = [...uploaded, ...bundledBackgrounds]
 
       if (update.updateAvailable) {
         downloadingUpdate = true
@@ -75,18 +74,6 @@
           ],
           'Launcher update'
         )
-      }
-
-      if (maintenanceInfo) {
-        const format: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }
-        const start = maintenanceInfo.startTime ? new Date(maintenanceInfo.startTime).toLocaleString([], format) : 'Unknown'
-        const end = maintenanceInfo.endTime ? new Date(maintenanceInfo.endTime).toLocaleString([], format) : 'Unknown'
-        blocking.set({
-          kind: 'maintenance',
-          dates: `From ${start} to ${end}`,
-          reason: maintenanceInfo.message ?? 'Please come back later.'
-        })
-        return
       }
 
       if (backgrounds[0]) await preloadImage(backgrounds[0])
@@ -128,16 +115,7 @@
   </div>
 {/if}
 
-{#if $blocking.kind === 'maintenance'}
-  <div id="view-maintenance" class="maintenance loaded">
-    <div class="maintenance-card">
-      <p class="gears"><i class="fa-solid fa-gears"></i></p>
-      <h3>Maintenance</h3>
-      <p class="dates">{$blocking.dates}</p>
-      <p class="text">{$blocking.reason}</p>
-    </div>
-  </div>
-{:else if $blocking.kind === 'update'}
+{#if $blocking.kind === 'update'}
   <div id="view-update" class="update loaded">
     <div class="maintenance-card">
       <p class="up"><i class="fa-solid fa-circle-up"></i></p>

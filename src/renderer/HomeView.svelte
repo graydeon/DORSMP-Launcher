@@ -4,7 +4,8 @@
   import { marked } from 'marked'
   import logger from 'electron-log/renderer'
   import type { IProfile } from 'eml-lib'
-  import { game, news as newsApi, profiles as profilesApi, server, settings as settingsApi } from '../ipc'
+  import type { IMaintenance } from 'eml-lib'
+  import { game, maintenance as maintenanceApi, news as newsApi, profiles as profilesApi, server, settings as settingsApi } from '../ipc'
   import { account, avatar, get as getStoreValue, overlay, profileTokens, profiles, requestedProfile, selectedProfile, showDialog } from './stores'
   import { fade, slide } from 'svelte/transition'
   import logo from '../static/images/logo.png'
@@ -36,6 +37,10 @@
   let totalBytes = $state(0)
   let downloaded = $state<Record<string, number>>({})
   let statusRequest = 0
+  // Active maintenance window, or null. canBypass is true for players on its AdminTool allow list.
+  let maintenance = $state<IMaintenance | null>(null)
+  let now = $state(Date.now())
+  let playBlocked = $derived(!!maintenance && !maintenance.canBypass)
   let profileRequest = 0
   let selectedSlug = $derived($selectedProfile?.slug)
 
@@ -108,11 +113,31 @@
         }, 10000)
       )
     ]
+    // Recheck maintenance every minute so the card and Play button follow the AdminTool without a restart.
+    void refreshMaintenance()
+    const maintenanceTimer = window.setInterval(() => {
+      now = Date.now()
+      void refreshMaintenance()
+    }, 60_000)
     return () => {
+      window.clearInterval(maintenanceTimer)
       window.removeEventListener('click', closeMenu)
       unsubscribe.forEach((dispose) => dispose())
     }
   })
+
+  async function refreshMaintenance() {
+    maintenance = await maintenanceApi.get($account ?? undefined).catch(() => null)
+  }
+
+  function maintenanceUntil(m: IMaintenance) {
+    if (!m.endTime) return 'No end time set'
+    const end = new Date(m.endTime)
+    const mins = Math.max(1, Math.round((end.getTime() - now) / 60_000))
+    const left = mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins} min`
+    const when = end.toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })
+    return `Until ${when} (${left} left)`
+  }
 
   async function loadNews() {
     newsLoading = true
@@ -165,7 +190,7 @@
   }
 
   async function startGame() {
-    if (!$account || launch.visible) return
+    if (!$account || launch.visible || playBlocked) return
     launch = { visible: true, label: 'Preparing download...', percent: null, indeterminate: true }
     totalBytes = 0
     downloaded = {}
@@ -270,16 +295,26 @@ Ready to launch the game with the following settings:
         <div class="status-indicator" id="server-status-indicator">
           <div
             class="status-dot"
-            class:pinging={serverState === 'pinging'}
-            class:online={serverState === 'online'}
-            class:offline={serverState === 'offline'}
+            class:pinging={!maintenance && serverState === 'pinging'}
+            class:online={!maintenance && serverState === 'online'}
+            class:offline={!maintenance && serverState === 'offline'}
+            class:maintenance={!!maintenance}
           ></div>
-          <span class="status-text">{serverState === 'pinging' ? 'Pinging...' : serverState === 'online' ? 'Online' : 'Offline'}</span>
+          <span class="status-text"
+            >{maintenance ? 'Maintenance' : serverState === 'pinging' ? 'Pinging...' : serverState === 'online' ? 'Online' : 'Offline'}</span
+          >
         </div>
         {#if players}<div class="player-count"><i class="fa-fw fa-solid fa-users"></i>&nbsp;&nbsp;{players}</div>{/if}
       </div>
+      {#if maintenance}<div class="maintenance-notice" role="status">
+          <strong>{maintenanceUntil(maintenance)}</strong>
+          {#if maintenance.message}<span>{maintenance.message}</span>{/if}
+          {#if maintenance.canBypass}<span class="bypass">You're on the maintenance list, so you can still play.</span>{/if}
+        </div>{/if}
       <div class="launch-area">
-        {#if !launch.visible}<button id="btn-play" onclick={startGame}>PLAY</button>
+        {#if !launch.visible}<button id="btn-play" onclick={startGame} disabled={playBlocked} title={playBlocked ? 'The server is under maintenance' : undefined}
+            >PLAY</button
+          >
         {:else}<div class="progress-container" id="launch-progress-container">
             <div class="progress-info"><span>{launch.label}</span><span>{launch.percent === null ? '' : `${Math.round(launch.percent)}%`}</span></div>
             <div class="progress-bar-bg">

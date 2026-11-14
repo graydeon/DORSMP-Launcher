@@ -8,7 +8,6 @@ import type {
   DownloaderEvents,
   FileManagerEvents,
   IAvatar,
-  IBackground,
   IBootstraps,
   ICape,
   IMaintenance,
@@ -120,10 +119,10 @@ contextBridge.exposeInMainWorld('api', {
     getCategories: (): Promise<any[]> => ipcRenderer.invoke('news:get_categories')
   },
   background: {
-    get: (): Promise<IBackground | null> => ipcRenderer.invoke('background:get')
+    list: (): Promise<string[]> => ipcRenderer.invoke('background:list')
   },
   maintenance: {
-    get: (): Promise<IMaintenance | null> => ipcRenderer.invoke('maintenance:get')
+    get: (account?: Account): Promise<IMaintenance | null> => ipcRenderer.invoke('maintenance:get', account)
   },
   bootstraps: {
     check: (): Promise<IBootstraps> => ipcRenderer.invoke('bootstraps:check'),

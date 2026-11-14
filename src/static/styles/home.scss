@@ -205,6 +205,11 @@
     &.offline {
       background-color: #f04747;
     }
+
+    &.maintenance {
+      background-color: #f5c518;
+      box-shadow: 0 0 8px #f5c518;
+    }
   }
 
   .player-count {
@@ -252,6 +257,37 @@
 
   &:active {
     transform: scale(0.98);
+  }
+
+  &:disabled {
+    background: #4a4a4a;
+    color: rgba(255, 255, 255, 0.45);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.maintenance-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(240, 71, 71, 0.55);
+  border-radius: 8px;
+  background: rgba(240, 71, 71, 0.16);
+  color: #ffd6d6;
+  font-size: 12px;
+  line-height: 1.4;
+
+  strong {
+    color: #fff;
+    font-size: 12.5px;
+  }
+
+  .bypass {
+    color: #f5c518;
   }
 }
 
