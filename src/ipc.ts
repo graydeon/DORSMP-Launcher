@@ -102,6 +102,7 @@ declare global {
         launchClose: (callback: (value: any) => void) => void
         launchDebug: (callback: (value: LauncherEvents['launch_debug'][0]) => void) => void
         patchDebug: (callback: (value: PatcherEvents['patch_debug'][0]) => void) => void
+        openFolder: (payload: { account: Account; profileSlug?: string }) => Promise<{ path: string; error?: string }>
       }
       crashReports: {
         onDetected: (callback: (value: { id: string; exitCode: number; date: string; profile: string; minecraftVersion: string }) => void) => () => void
@@ -199,7 +200,8 @@ export const game = {
   launchData: (callback: (value: LauncherEvents['launch_data'][0]) => void) => window.api.game.launchData(callback),
   launchClose: (callback: (value: any) => void) => window.api.game.launchClose(callback),
   launchDebug: (callback: (value: LauncherEvents['launch_debug'][0]) => void) => window.api.game.launchDebug(callback),
-  patchDebug: (callback: (value: PatcherEvents['patch_debug'][0]) => void) => window.api.game.patchDebug(callback)
+  patchDebug: (callback: (value: PatcherEvents['patch_debug'][0]) => void) => window.api.game.patchDebug(callback),
+  openFolder: (payload: { account: Account; profileSlug?: string }) => window.api.game.openFolder(payload)
 }
 
 export const crashReports = {

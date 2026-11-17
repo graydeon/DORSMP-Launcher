@@ -89,7 +89,9 @@ contextBridge.exposeInMainWorld('api', {
     launchClose: (callback: (value: any) => void) => ipcRenderer.on('game:launch_close', (_event, value) => callback(value)),
     launchDebug: (callback: (value: LauncherEvents['launch_debug'][0]) => void) =>
       ipcRenderer.on('game:launch_debug', (_event, value) => callback(value)),
-    patchDebug: (callback: (value: PatcherEvents['patch_debug'][0]) => void) => ipcRenderer.on('game:patch_debug', (_event, value) => callback(value))
+    patchDebug: (callback: (value: PatcherEvents['patch_debug'][0]) => void) => ipcRenderer.on('game:patch_debug', (_event, value) => callback(value)),
+    openFolder: (payload: { account: Account; profileSlug?: string }): Promise<{ path: string; error?: string }> =>
+      ipcRenderer.invoke('game:openFolder', payload)
   },
   crashReports: {
     onDetected: (callback: (value: { id: string; exitCode: number; date: string; profile: string; minecraftVersion: string }) => void) =>

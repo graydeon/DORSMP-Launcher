@@ -1,5 +1,5 @@
-import { ipcMain, BrowserWindow, app } from 'electron'
-import { existsSync, readdirSync } from 'node:fs'
+import { ipcMain, BrowserWindow, app, shell } from 'electron'
+import { existsSync, mkdirSync, readdirSync } from 'node:fs'
 import { Launcher } from 'eml-lib'
 import type { Account } from 'eml-lib'
 import type { IGameSettings } from './settings'
@@ -9,6 +9,14 @@ import type { StatsIntegration } from './stats'
 import type { CrashReportIntegration } from './crashreports'
 
 export function registerLauncherHandlers(mainWindow: BrowserWindow, integrations: { stats: StatsIntegration; crashReports: CrashReportIntegration }) {
+  // Settings > "Open game folder": the selected profile's folder, resolved by eml-lib exactly as a launch does.
+  ipcMain.handle('game:openFolder', async (_event, payload: { account: Account; profileSlug?: string }) => {
+    const root = new Launcher({ url: ADMINTOOL_URL, root: GAME_FOLDER, profile: { slug: payload.profileSlug }, account: payload.account }).config.root
+    mkdirSync(root, { recursive: true })
+    const error = await shell.openPath(root)
+    return { path: root, error: error || undefined }
+  })
+
   ipcMain.handle('game:launch', (_event, payload: { account: Account; settings: IGameSettings; profileSlug?: string; token?: string }) => {
     const { account, settings, profileSlug } = payload
     const java = settings.java === 'system' ? { install: 'manual' as const, absolutePath: 'java' } : { install: 'auto' as const }

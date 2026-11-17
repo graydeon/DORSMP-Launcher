@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte'
   import { fade } from 'svelte/transition'
   import type { SkinViewer as SkinViewerType } from 'skinview3d'
-  import { auth, crashReports, settings as settingsApi, skin as skinApi, system } from '../ipc'
+  import { auth, crashReports, game, settings as settingsApi, skin as skinApi, system } from '../ipc'
   import { LOGS_NOTICE } from './logsNotice'
   import type { IGameSettings } from '../../electron/handlers/settings'
   import { account, avatar, capes, overlay, page, profileTokens, profiles, selectedProfile, showDialog, skins } from './stores'
@@ -44,6 +44,12 @@
       [{ text: 'OK', type: 'ok' }],
       result.success ? 'Logs sent' : 'Send failed'
     )
+  }
+  async function openGameFolder() {
+    const currentAccount = $account
+    if (!currentAccount) return
+    const result = await game.openFolder({ account: currentAccount, profileSlug: $selectedProfile?.slug })
+    if (result.error) await showDialog(`Could not open ${result.path}: ${result.error}`, [{ text: 'OK', type: 'ok' }], 'Game folder')
   }
   let settings = $state<IGameSettings | null>(null)
   let version = $state('')
@@ -393,6 +399,11 @@
             <button id="send-logs" class="btn btn-secondary" disabled={sendingLogs} onclick={sendLogs}
               >{sendingLogs ? 'Sending...' : 'Send logs to admins'}</button
             >
+          </div>
+          <div class="setting-group">
+            <label for="open-folder"><i class="fa-fw fa-solid fa-folder-open"></i>&nbsp;&nbsp;Game folder</label>
+            <button id="open-folder" class="btn btn-secondary" onclick={openGameFolder}>Open game folder</button>
+            <p class="setting-hint">Configs you edit here are kept. Mods are synced to the server's list on every launch, so added or removed jars get reverted.</p>
           </div>
         </section>
       {:else if tab === 'skin'}
