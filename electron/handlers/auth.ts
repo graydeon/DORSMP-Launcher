@@ -30,6 +30,17 @@ export async function ensureFreshAccount(auth: MicrosoftAuth, account: Account):
   }
 }
 
+// eml-lib passes the access token itself as --xuid when account.xbox is missing (it always is for Microsoft
+// logins), and Minecraft logs --xuid unmasked. Give it the real numeric xuid, which the token carries as a claim.
+export function withXuid(account: Account): Account {
+  if (account.xbox?.xuid) return account
+  let claims: { xuid?: string; agg?: string } = {}
+  try {
+    claims = JSON.parse(Buffer.from(account.accessToken.split('.')[1], 'base64url').toString())
+  } catch {}
+  return { ...account, xbox: { xuid: /^\d+$/.test(claims.xuid ?? '') ? claims.xuid! : '0', gamertag: '', ageGroup: claims.agg ?? '' } }
+}
+
 export function registerAuthHandlers(mainWindow: Electron.BrowserWindow): MicrosoftAuth {
   const auth = new MicrosoftAuth(mainWindow)
 

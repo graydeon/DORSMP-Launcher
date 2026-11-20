@@ -7,7 +7,7 @@ import logger from 'electron-log/main'
 import { ADMINTOOL_URL, GAME_FOLDER } from '../const'
 import type { StatsIntegration } from './stats'
 import type { CrashReportIntegration } from './crashreports'
-import { ensureFreshAccount } from './auth'
+import { ensureFreshAccount, withXuid } from './auth'
 
 export function registerLauncherHandlers(mainWindow: BrowserWindow, integrations: { stats: StatsIntegration; crashReports: CrashReportIntegration }, auth: MicrosoftAuth) {
   // Settings > "Open game folder": the selected profile's folder, resolved by eml-lib exactly as a launch does.
@@ -20,7 +20,7 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow, integrations
 
   ipcMain.handle('game:launch', async (_event, payload: { account: Account; settings: IGameSettings; profileSlug?: string; token?: string }) => {
     const { settings, profileSlug } = payload
-    const account = await ensureFreshAccount(auth, payload.account)
+    const account = withXuid(await ensureFreshAccount(auth, payload.account))
     const java = settings.java === 'system' ? { install: 'manual' as const, absolutePath: 'java' } : { install: 'auto' as const }
     logger.log('Launching')
 
