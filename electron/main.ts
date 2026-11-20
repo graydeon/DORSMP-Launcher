@@ -132,7 +132,7 @@ app.whenReady().then(() => {
     const bootstrap = registerBootstrapHandlers(mainWindow)
     stats.attach(bootstrap)
     const crashReports = registerCrashReportHandlers(mainWindow)
-    registerLauncherHandlers(mainWindow, { stats, crashReports })
+    registerLauncherHandlers(mainWindow, { stats, crashReports }, auth)
     registerSettingsHandlers()
   }
 })

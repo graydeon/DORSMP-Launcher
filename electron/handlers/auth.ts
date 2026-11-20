@@ -9,6 +9,27 @@ const sessionPath = path.join(app.getPath('userData'), 'session.json')
 
 export type IAuthResponse = { success: true; account: Account } | { success: false; error: string }
 
+// Minecraft access tokens last 24 h and the launcher can stay open far longer (it only minimizes on launch),
+// so the token is checked again right before every launch, not just at startup.
+export async function ensureFreshAccount(auth: MicrosoftAuth, account: Account): Promise<Account> {
+  // The renderer keeps the account from startup; an earlier pre-launch refresh may have saved a newer one.
+  try {
+    const saved = JSON.parse(fs.readFileSync(sessionPath, 'utf-8')) as Account
+    if (saved.uuid === account.uuid) account = saved
+  } catch {}
+  if (await auth.validate(account)) return account
+  try {
+    const fresh = await auth.refresh(account)
+    fs.writeFileSync(sessionPath, JSON.stringify(fresh))
+    logger.log('Refreshed the Minecraft session before launch.')
+    return fresh
+  } catch (err) {
+    // Keep launching with the old token: validate also fails when Mojang is merely unreachable.
+    logger.warn('Could not refresh the Minecraft session before launch:', err)
+    return account
+  }
+}
+
 export function registerAuthHandlers(mainWindow: Electron.BrowserWindow): MicrosoftAuth {
   const auth = new MicrosoftAuth(mainWindow)
 
