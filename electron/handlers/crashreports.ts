@@ -6,6 +6,7 @@ import { CrashReport, Launcher } from 'eml-lib'
 import type { Account, LauncherEvents } from 'eml-lib'
 import logger from 'electron-log/main'
 import { ADMINTOOL_URL, GAME_FOLDER } from '../const'
+import { maskTokens } from './redact'
 
 type CrashData = LauncherEvents['launch_crash'][0]
 type Logs = { launcherLogs: string; launchArgs: string; crashReportLog: string; latestLog: string }
@@ -80,7 +81,8 @@ function createCrashReport() {
   internal.sanitizeText = (text, launcher) => {
     const keepName = Object.create(launcher) as Launcher
     Object.defineProperty(keepName, 'config', { value: { ...launcher.config, account: { ...launcher.config.account, name: '' } } })
-    return sanitizeText(text, keepName)
+    // Tokens first: eml-lib's own masks need the token whole, and its username replacement could split one.
+    return sanitizeText(maskTokens(text), keepName)
   }
   return instance
 }
